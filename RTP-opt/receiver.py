@@ -70,14 +70,15 @@ def receiver(receiver_ip, receiver_port, window_size):
 
         if header.type == 2:  # DATA
             seq = header.seq_num
-            if seq >= expected + window_size or seq < expected:
-                # Outside window (or old duplicate): drop, no ACK.
+            if seq >= expected + window_size:
+                # Outside window: drop without ACK to keep the window bounded.
                 continue
             if seq not in buffer:
                 buffer[seq] = payload
             if seq == expected:
                 deliver()
-            # Individual ACK: echo the received seq_num instead of cumulative.
+            # Individual ACK: echo the received seq_num. Re-ACKing duplicates
+            # below the window lets the sender recover a lost ACK.
             send_ack(s, sender_addr, seq)
 
         elif header.type == 1:  # END
