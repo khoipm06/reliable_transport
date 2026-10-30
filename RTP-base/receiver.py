@@ -82,7 +82,8 @@ def receiver(receiver_ip, receiver_port, window_size):
             send_ack(s, sender_addr, expected)
 
         elif header.type == 1:  # END
-            send_ack(s, sender_addr, header.seq_num)
+            # ACK convention (cf. ACK-for-START = seq 1): ACK = END seq + 1.
+            send_ack(s, sender_addr, header.seq_num + 1)
             break
 
     s.close()
